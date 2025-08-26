@@ -1,20 +1,23 @@
-using System;
-using System.IO;
 using UnityEngine;
+using System.IO;
+using System;
+
 
 public class DataManager : MonoBehaviour
 {
+
+
     public static DataManager Instance;
-
-    public string CurrentPlayerName = "";
+    public string UserName = "";
     public int BestScore = 0;
-    public string BestScorePlayerName = "";
+    public string BestUserName = "";
 
-    [Serializable]
+
+    [System.Serializable]
     private class SaveData
     {
+        public string bestUserName;
         public int bestScore;
-        public string bestScorePlayerName;
     }
 
     private void Awake()
@@ -31,33 +34,34 @@ public class DataManager : MonoBehaviour
         LoadBestScore();
     }
 
-    public void SetPlayerName(string playerName)
+    public void SetCurrentPlayerName(string userName)
     {
-        CurrentPlayerName = playerName;
+        UserName = userName;
     }
 
-    public void TrySaveBestScore(int score)
+    public void ChangeBestScore(int score)
     {
         if (score > BestScore)
         {
             BestScore = score;
-            BestScorePlayerName = string.IsNullOrEmpty(CurrentPlayerName) ? "Player" : CurrentPlayerName;
+            BestUserName = string.IsNullOrEmpty(UserName) ? "Player" : UserName;
             SaveBestScore();
         }
     }
 
     public void SaveBestScore()
     {
-        SaveData data = new SaveData
+        SaveData data = new SaveData();
         {
-            bestScore = BestScore,
-            bestScorePlayerName = BestScorePlayerName
-        };
+            data.bestScore = BestScore;
+            data.bestUserName = BestUserName;
+        }
 
         string json = JsonUtility.ToJson(data);
-        File.WriteAllText(GetSavePath(), json);
-    }
 
+        File.WriteAllText(GetSavePath(), json);
+
+    }
     public void LoadBestScore()
     {
         string path = GetSavePath();
@@ -65,15 +69,14 @@ public class DataManager : MonoBehaviour
         {
             string json = File.ReadAllText(path);
             SaveData data = JsonUtility.FromJson<SaveData>(json);
+
             BestScore = data.bestScore;
-            BestScorePlayerName = data.bestScorePlayerName;
-        }
+            BestUserName = data.bestUserName;
+            }
     }
 
     private string GetSavePath()
     {
-        return Path.Combine(Application.persistentDataPath, "savefile.json");
+        return Application.persistentDataPath + "/savefile.json";
     }
 }
-
-
